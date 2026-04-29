@@ -1,293 +1,60 @@
 <!DOCTYPE html>
-
- 
-
 <html>
-
- 
-
 <head>
-
- 
-
-    <title>Skills Recommendation System</title>
-
- 
-
-    <style>
-
- 
-
-        body {
-
- 
-
-            font-family: Arial;
-
- 
-
-            backgroupythonnd: #f4f4f4;
-
- 
-
-            text-align: center;
-
- 
-
-        }
-
- 
-
- 
-
- 
-
-        .container {
-
- 
-
-            margin-top: 100px;
-
- 
-
-        }
-
- 
-
- 
-
- 
-
-        textarea {
-
- 
-
-            width: 400px;
-
- 
-
-            height: 120px;
-
- 
-
-        }
-
- 
-
- 
-
- 
-
-        button {
-
- 
-
-            padding: 10px 20px;
-
- 
-
-            margin-top: 10px;
-
- 
-
-            cursor: pointer;
-
- 
-
-        }
-
- 
-
- 
-
- 
-
-        .result {
-
- 
-
-            margin-tpythonop: 20px;
-
- 
-
-            background: white;
-
- 
-
-            padding: 20px;
-
- 
-
-            display: inline-block;
-
- 
-
-        }
-
- 
-
-    </style>
-
- 
-
+<title>AI Course Recommendation</title>
 </head>
-
- 
-
 <body>
 
- 
+<h1>AI Course Recommendation</h1>
 
- 
+<textarea id="text" rows="8" cols="60" placeholder="Enter your skills or interests..."></textarea>
+<br><br>
 
- 
+<button onclick="getRecommendations()">Recommend</button>
 
-<div class="container">
-
- 
-
-    <h1>AI Course Recommendation</h1>
-
- 
-
- 
-
- 
-
-    <textarea id="text" placeholder="Enter your skills or interests..."></textarea>
-
- 
-
-    <br>
-
- 
-
-    <button onclick="sendData()">Recommend</button>
-
- 
-
- 
-
- 
-
-    <div class="result" id="result"></div>
-
- 
-
-</div>
-
- 
-
- 
-
- 
+<h2>Recommended Courses:</h2>
+<div id="results"></div>
 
 <script>
+       async function getRecommendations() {
+           const text = document.getElementById("text").value;
+           const resultsDiv = document.getElementById("results");
 
- 
+           resultsDiv.innerHTML = "Loading...";
 
-function sendData() {
+           const response = await fetch("/api/recommend", {
+               method: "POST",
+               headers: {
+                   "Content-Type": "application/json"
+               },
+               body: JSON.stringify({ text: text })
+           });
 
- 
+           const data = await response.json();
 
-    const text = document.getElementById("text").value;
+           if (data.error) {
+               resultsDiv.innerHTML = data.error;
+               return;
+           }
 
- 
+           resultsDiv.innerHTML = "";
 
- 
+           if (data.recommendations.length === 0) {
+               resultsDiv.innerHTML = "No related courses found.";
+               return;
+           }
 
- 
-
-    fetch("/api/recommend", {
-
- 
-
-        method: "POST",
-
- 
-
-        headers: {
-
- 
-
-            "Content-Type": "application/json"
-
- 
-
-        },
-
- 
-
-        body: JSON.stringify({text: text})
-
- 
-
-    })
-
- 
-
-    .then(res => res.json())
-
- 
-
-    .then(data => {
-
- 
-
-        let output = "<h3>Skills:</h3>" + data.skills.join(", ");
-
- 
-
- 
-
- 
-
-        output += "<h3>Recommendations:</h3>";
-
- 
-
- 
-
- 
-
-        data.recommendations.forEach(c => {
-
- 
-
-            output += `<p><b>${c.course}</b> : ${c.score.toFixed(2)}</p>`;
-
- 
-
-        });
-
- 
-
- 
-
- 
-
-        document.getElementById("result").innerHTML = output;
-
- 
-
-    });
-
- 
-
-}
-
- 
-
+           data.recommendations.forEach(course => {
+               resultsDiv.innerHTML += `
+<div>
+<h3>${course.title}</h3>
+<p>${course.description}</p>
+</div>
+<hr>
+               `;
+           });
+       }
 </script>
 
- 
-
- 
-
- 
-
 </body>
-
- 
-
 </html>

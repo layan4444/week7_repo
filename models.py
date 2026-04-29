@@ -13,12 +13,9 @@ users = Table(
     metadata,
 
     Column("id", Integer, primary_key=True),
-
     Column("name", String)
 
 )
-
- 
 
 # SKILLS
 
@@ -29,12 +26,9 @@ skills = Table(
     metadata,
 
     Column("id", Integer, primary_key=True),
-
     Column("name", String)
 
 )
-
- 
 
 # USER_SKILLS (MANY TO MANY)
 

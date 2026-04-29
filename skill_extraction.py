@@ -1,9 +1,5 @@
 from embedding import get_embedding
-
 import numpy as np
-
- 
-
 
 SKILL_BANK = [
 
@@ -14,26 +10,17 @@ SKILL_BANK = [
     "backend development", "ai", "nlp"
 
 ]
-                                 
- 
-
  
 
 def extract_skills(text):
 
     text_vector = get_embedding(text)
 
- 
-
     extracted = []
-
- 
 
     for skill in SKILL_BANK:
 
         skill_vector = get_embedding(skill)
-
- 
 
         similarity = np.dot(text_vector, skill_vector) / (
 

@@ -1,77 +1,50 @@
 import numpy as np
-
 from sklearn.metrics.pairwise import cosine_similarity
-
 from embedding import get_embedding
 
- 
-
- 
 
 def build_user_vector(skills):
+   if not skills:
+       return get_embedding("general")
 
-    if not skills:
+   vectors = [get_embedding(skill) for skill in skills]
+   return np.mean(vectors, axis=0)
 
-        return get_embedding("general")
 
- 
+def recommend_courses(user_skills, course_rows, top_n=3, min_score=0.45):
+   user_vector = build_user_vector(user_skills)
 
-    vectors = [get_embedding(skill) for skill in skills]
+   course_vectors = []
+   course_list = []
 
-    return np.mean(vectors, axis=0)
+   for row in course_rows:
+       course = row._mapping
 
- 
+       title = course["title"]
+       description = course["description"]
 
- 
+       text = f"{title} {description}"
 
-def recommend_courses(user_skills, course_rows, top_n=3):
+       course_vectors.append(get_embedding(text))
+       course_list.append({
+           "title": title,
+           "description": description
+       })
 
- 
+   if not course_vectors:
+       return []
 
-    user_vector = build_user_vector(user_skills)
+   scores = cosine_similarity([user_vector], course_vectors)[0]
 
- 
+   ranked = sorted(
+       zip(course_list, scores),
+       key=lambda x: x[1],
+       reverse=True
+   )
 
-    course_vectors = []
+   filtered = [
+       course for course, score in ranked
+       if score >= min_score
+   ]
 
-    course_titles = []
-
- 
-
-    for row in course_rows:
-
-        text = f"{row.title} {row.description}"
-
-        course_titles.append(row.title)
-
-        course_vectors.append(get_embedding(text))
-
- 
-
-    scores = cosine_similarity([user_vector], course_vectors)[0]
-
- 
-
-    ranked = np.argsort(scores)[::-1]
-
- 
-
-    results = []
-
- 
-
-    for i in ranked[:top_n]:
-
-        results.append({
-
-            "course": course_titles[i],
-
-            "score": float(scores[i]),
-
-            "explanation": "Matched using semantic similarity between user skills and course content"
-
-        })
-
- 
-
-    return results
+   return filtered[:top_n]
